@@ -2,8 +2,8 @@ import React from "react";
 import { cn } from "../lib/utils";
 import { CHAR_AVATAR } from "../constants";
 import { useSettings } from "../contexts/SettingsContext";
-import { Heart, Skull } from "lucide-react";
-import { motion } from "motion/react";
+import { Heart, Skull, Copy, Edit2, Trash2 } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 
 interface MessageItemProps {
   content: string;
@@ -11,6 +11,9 @@ interface MessageItemProps {
   userName: string;
   scoreChange?: number;
   charAvatar: string;
+  onCopy?: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }
 
 export const MessageItem: React.FC<MessageItemProps> = ({
@@ -19,9 +22,13 @@ export const MessageItem: React.FC<MessageItemProps> = ({
   userName,
   scoreChange,
   charAvatar,
+  onCopy,
+  onEdit,
+  onDelete,
 }) => {
   const isAssistant = role === "assistant";
   const { settings } = useSettings();
+  const [isHovered, setIsHovered] = React.useState(false);
 
   // Replace {{user}} with actual name and hide [GET: ...] tags
   const processedContent = content
@@ -64,9 +71,11 @@ export const MessageItem: React.FC<MessageItemProps> = ({
     >
       <div
         className={cn(
-          "flex max-w-[85%] items-end gap-2",
+          "flex max-w-[85%] items-end gap-2 group relative",
           isAssistant ? "flex-row" : "flex-row-reverse"
         )}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
         {isAssistant && (
           <div className="flex-shrink-0 mb-1">
@@ -117,6 +126,36 @@ export const MessageItem: React.FC<MessageItemProps> = ({
             </div>
           )}
         </div>
+
+        {/* Action Buttons for User Messages */}
+        {!isAssistant && (
+          <AnimatePresence>
+            {isHovered && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                className="absolute top-0 right-full mr-2 flex items-center gap-1 bg-white dark:bg-gray-800 p-1 rounded-xl shadow-sm border border-pink-100 dark:border-gray-700"
+              >
+                {onCopy && (
+                  <button onClick={onCopy} className="p-1.5 text-gray-400 hover:text-pink-500 hover:bg-pink-50 dark:hover:bg-gray-700 rounded-lg transition-colors" title="Sao chép">
+                    <Copy className="w-4 h-4" />
+                  </button>
+                )}
+                {onEdit && (
+                  <button onClick={onEdit} className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg transition-colors" title="Chỉnh sửa">
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                )}
+                {onDelete && (
+                  <button onClick={onDelete} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-gray-700 rounded-lg transition-colors" title="Xóa">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        )}
       </div>
     </div>
   );
