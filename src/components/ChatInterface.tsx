@@ -19,6 +19,7 @@ interface ChatInterfaceProps {
   onEditLastMessage: (content: string) => void;
   onEditMessage: (id: string, content: string) => void;
   onDeleteMessage: (id: string) => void;
+  onSelectVariant: (id: string, variantIndex: number) => void;
   onOpenSettings: () => void;
   onOpenNotebook: () => void;
   onOpenMusicPlayer: () => void;
@@ -42,6 +43,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   onEditLastMessage,
   onEditMessage,
   onDeleteMessage,
+  onSelectVariant,
   onOpenSettings,
   onOpenNotebook,
   onOpenMusicPlayer,
@@ -257,6 +259,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                   userName={userInfo.name}
                   scoreChange={msg.scoreChange}
                   charAvatar={charAvatar}
+                  variantsCount={msg.variants?.length}
+                  currentVariantIndex={msg.currentVariantIndex}
+                  onSelectVariant={(index) => onSelectVariant(msg.id, index)}
                   onCopy={() => navigator.clipboard.writeText(msg.content)}
                   onEdit={msg.role === "user" ? () => {
                     setEditingMessageId(msg.id);
