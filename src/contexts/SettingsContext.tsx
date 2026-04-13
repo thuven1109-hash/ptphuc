@@ -86,10 +86,10 @@ function getFontFamily(font: FontType): string {
 
 function getFontSizeValue(size: FontSize): string {
   switch (size) {
-    case "xs": return "14px";
-    case "sm": return "15px";
-    case "lg": return "18px";
-    case "xl": return "20px";
-    default: return "16px";
+    case "xs": return "12px";
+    case "sm": return "14px";
+    case "lg": return "16px";
+    case "xl": return "18px";
+    default: return "14px";
   }
 }
