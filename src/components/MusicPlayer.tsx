@@ -116,6 +116,17 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!playerRef.current || duration === 0) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const percentage = Math.max(0, Math.min(1, x / rect.width));
+    const newTime = percentage * duration;
+    playerRef.current.seekTo(newTime, true);
+    setCurrentTime(newTime);
+    setProgress(percentage * 100);
+  };
+
   const extractYoutubeId = (url: string) => {
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
     const match = url.match(regExp);
@@ -296,7 +307,10 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
 
                   {/* Progress Bar */}
                   <div className="space-y-2 relative z-10">
-                    <div className="h-3 w-full bg-pink-50 dark:bg-gray-800 rounded-full overflow-hidden border border-pink-100 dark:border-pink-900/20 relative">
+                    <div 
+                      className="h-3 w-full bg-pink-50 dark:bg-gray-800 rounded-full overflow-hidden border border-pink-100 dark:border-pink-900/20 relative cursor-pointer"
+                      onClick={handleSeek}
+                    >
                       <motion.div
                         className="h-full bg-gradient-to-r from-pink-300 to-pink-400"
                         initial={false}
