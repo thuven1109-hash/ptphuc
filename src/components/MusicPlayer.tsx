@@ -1,6 +1,6 @@
 import React from "react";
 import { motion, AnimatePresence, useDragControls } from "motion/react";
-import { Music, Repeat, Trash2, Plus, X, Music2, Heart, Sparkles, Star } from "lucide-react";
+import { Music, Repeat, Trash2, Plus, X, Music2, Heart, Sparkles, Star, Shuffle } from "lucide-react";
 import { Song, MusicState } from "../types";
 
 interface MusicPlayerProps {
@@ -52,24 +52,38 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
     }
   };
 
+  const musicStateRef = React.useRef(musicState);
+  React.useEffect(() => {
+    musicStateRef.current = musicState;
+  }, [musicState]);
+
   const onPlayerStateChange = (event: any) => {
     // @ts-ignore
     if (event.data === window.YT.PlayerState.ENDED) {
-      if (musicState.loopMode === 'single') {
+      const state = musicStateRef.current;
+      if (state.loopMode === 'single') {
         event.target.playVideo();
-      } else if (musicState.loopMode === 'list') {
-        const nextIndex = (musicState.currentSongIndex + 1) % musicState.playlist.length;
+      } else if (state.isShuffle) {
+        const nextIndex = Math.floor(Math.random() * state.playlist.length);
+        setMusicState(prev => ({ ...prev, currentSongIndex: nextIndex }));
+      } else if (state.loopMode === 'list') {
+        const nextIndex = (state.currentSongIndex + 1) % state.playlist.length;
         setMusicState(prev => ({ ...prev, currentSongIndex: nextIndex }));
       } else {
-        setMusicState(prev => ({ ...prev, isPlaying: false }));
+        const nextIndex = state.currentSongIndex + 1;
+        if (nextIndex < state.playlist.length) {
+          setMusicState(prev => ({ ...prev, currentSongIndex: nextIndex }));
+        } else {
+          setMusicState(prev => ({ ...prev, isPlaying: false }));
+        }
       }
     }
   };
 
   React.useEffect(() => {
     let interval: NodeJS.Timeout;
-    if (musicState.isPlaying && playerRef.current) {
-      interval = setInterval(() => {
+    const updateProgress = () => {
+      if (playerRef.current && playerRef.current.getCurrentTime) {
         const current = playerRef.current.getCurrentTime();
         const total = playerRef.current.getDuration();
         if (total > 0) {
@@ -77,7 +91,11 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
           setDuration(total);
           setProgress((current / total) * 100);
         }
-      }, 500);
+      }
+    };
+
+    if (musicState.isPlaying) {
+      interval = setInterval(updateProgress, 500);
     }
     return () => clearInterval(interval);
   }, [musicState.isPlaying]);
@@ -264,9 +282,16 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
                       <CatPawIcon className={`w-12 h-12 transition-transform ${musicState.isPlaying ? "scale-90" : "scale-110"}`} />
                     </button>
 
-                    <div className="p-4 rounded-2xl bg-gray-50 dark:bg-gray-800 text-gray-300">
-                      <Star className="w-6 h-6" />
-                    </div>
+                    <button
+                      onClick={() => setMusicState(prev => ({ ...prev, isShuffle: !prev.isShuffle }))}
+                      className={`p-4 rounded-2xl transition-all ${
+                        musicState.isShuffle
+                          ? "bg-pink-100 text-pink-500 dark:bg-pink-900/40" 
+                          : "bg-gray-50 text-gray-300 dark:bg-gray-800"
+                      }`}
+                    >
+                      <Shuffle className="w-6 h-6" />
+                    </button>
                   </div>
 
                   {/* Progress Bar */}
@@ -274,16 +299,18 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
                     <div className="h-3 w-full bg-pink-50 dark:bg-gray-800 rounded-full overflow-hidden border border-pink-100 dark:border-pink-900/20 relative">
                       <motion.div
                         className="h-full bg-gradient-to-r from-pink-300 to-pink-400"
+                        initial={false}
                         animate={{ width: `${progress}%` }}
-                        transition={{ duration: 1, ease: "linear" }}
+                        transition={{ duration: 0.5, ease: "linear" }}
                       />
                     </div>
                     {/* Progress Indicator */}
                     <motion.div 
                       className="absolute top-0 -mt-1 text-pink-400 pointer-events-none"
+                      initial={false}
                       animate={{ left: `${progress}%` }}
                       style={{ x: "-50%" }}
-                      transition={{ duration: 1, ease: "linear" }}
+                      transition={{ duration: 0.5, ease: "linear" }}
                     >
                       <Heart className="w-4 h-4 fill-current" />
                     </motion.div>
