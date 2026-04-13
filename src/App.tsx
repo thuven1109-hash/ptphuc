@@ -46,6 +46,7 @@ export default function App() {
       isPlaying: false,
       currentSongIndex: 0,
       loopMode: 'none',
+      isShuffle: false,
       isDiscVisible: true,
       discPosition: { x: typeof window !== 'undefined' ? window.innerWidth - 80 : 300, y: 80 }
     };
@@ -158,7 +159,7 @@ export default function App() {
     setDiaryEntries([]);
   };
 
-  const processAIResponse = (text: string, sessionId: string) => {
+  const processAIResponse = (text: string, sessionId: string, replaceMessageId?: string) => {
     let processedText = text;
     const inventoryUpdates: string[] = [];
     let scoreChange = 0;
@@ -193,21 +194,44 @@ export default function App() {
             }
           });
           
-          const currentFavorability = s.favorability || 0;
-          const newFavorability = currentFavorability + scoreChange;
+          let newMessages = [...s.messages];
+          let newFavorability = s.favorability || 0;
+
+          if (replaceMessageId) {
+            const msgIndex = newMessages.findIndex(m => m.id === replaceMessageId);
+            if (msgIndex !== -1) {
+              const oldMsg = newMessages[msgIndex];
+              const oldScore = oldMsg.scoreChange || 0;
+              
+              const variants = oldMsg.variants ? [...oldMsg.variants] : [{ content: oldMsg.content, scoreChange: oldMsg.scoreChange }];
+              variants.push({ content: processedText, scoreChange: scoreChange !== 0 ? scoreChange : undefined });
+              
+              newMessages[msgIndex] = {
+                ...oldMsg,
+                content: processedText,
+                scoreChange: scoreChange !== 0 ? scoreChange : undefined,
+                variants,
+                currentVariantIndex: variants.length - 1,
+              };
+              
+              newFavorability = newFavorability - oldScore + scoreChange;
+            }
+          } else {
+            newFavorability += scoreChange;
+            newMessages.push({
+              id: Date.now().toString(),
+              role: "assistant",
+              content: processedText,
+              timestamp: Date.now(),
+              scoreChange: scoreChange !== 0 ? scoreChange : undefined,
+              variants: [{ content: processedText, scoreChange: scoreChange !== 0 ? scoreChange : undefined }],
+              currentVariantIndex: 0,
+            });
+          }
 
           return {
             ...s,
-            messages: [
-              ...s.messages,
-              {
-                id: Date.now().toString(),
-                role: "assistant",
-                content: processedText,
-                timestamp: Date.now(),
-                scoreChange: scoreChange !== 0 ? scoreChange : undefined,
-              },
-            ],
+            messages: newMessages,
             inventory: newInventory,
             favorability: newFavorability,
             lastUpdate: Date.now(),
@@ -327,6 +351,72 @@ export default function App() {
       )
     );
     showToast("Đã cập nhật nội dung phản hồi");
+  };
+
+  const handleEditMessage = (messageId: string, newContent: string) => {
+    if (!currentSessionId) return;
+    setSessions((prev) =>
+      prev.map((s) =>
+        s.id === currentSessionId
+          ? {
+              ...s,
+              messages: s.messages.map((m) =>
+                m.id === messageId ? { ...m, content: newContent } : m
+              ),
+              lastUpdate: Date.now(),
+            }
+          : s
+      )
+    );
+    showToast("Đã cập nhật tin nhắn");
+  };
+
+  const handleDeleteMessage = (messageId: string) => {
+    if (!currentSessionId) return;
+    setSessions((prev) =>
+      prev.map((s) =>
+        s.id === currentSessionId
+          ? {
+              ...s,
+              messages: s.messages.filter((m) => m.id !== messageId),
+              lastUpdate: Date.now(),
+            }
+          : s
+      )
+    );
+    showToast("Đã xóa tin nhắn");
+  };
+
+  const handleSelectVariant = (messageId: string, variantIndex: number) => {
+    if (!currentSessionId) return;
+    setSessions((prev) =>
+      prev.map((s) => {
+        if (s.id === currentSessionId) {
+          let newFavorability = s.favorability || 0;
+          const newMessages = s.messages.map((m) => {
+            if (m.id === messageId && m.variants && m.variants[variantIndex]) {
+              const oldScore = m.scoreChange || 0;
+              const newScore = m.variants[variantIndex].scoreChange || 0;
+              newFavorability = newFavorability - oldScore + newScore;
+              return {
+                ...m,
+                content: m.variants[variantIndex].content,
+                scoreChange: m.variants[variantIndex].scoreChange,
+                currentVariantIndex: variantIndex,
+              };
+            }
+            return m;
+          });
+          return {
+            ...s,
+            messages: newMessages,
+            favorability: newFavorability,
+            lastUpdate: Date.now(),
+          };
+        }
+        return s;
+      })
+    );
   };
 
   const handleSaveSnapshot = (name: string) => {
@@ -480,25 +570,12 @@ export default function App() {
   const handleRefresh = async () => {
     if (!currentSessionId || !currentSession || isTyping) return;
     
-    // Remove last message if it was from assistant
+    // Get last message if it was from assistant
     const lastMsg = currentSession.messages[currentSession.messages.length - 1];
     if (lastMsg.role !== "assistant") return;
 
+    // We use the messages BEFORE the last one for context
     const newMessages = currentSession.messages.slice(0, -1);
-    const scoreToRevert = lastMsg.scoreChange || 0;
-
-    setSessions((prev) =>
-      prev.map((s) =>
-        s.id === currentSessionId
-          ? { 
-              ...s, 
-              messages: newMessages, 
-              favorability: (s.favorability || 0) - scoreToRevert,
-              lastUpdate: Date.now() 
-            }
-          : s
-      )
-    );
 
     setIsTyping(true);
     try {
@@ -521,7 +598,7 @@ export default function App() {
         selectedModel,
         additionalPrompt
       );
-      processAIResponse(response, currentSessionId);
+      processAIResponse(response, currentSessionId, lastMsg.id);
     } catch (error: any) {
       console.error(error);
       if (error.message?.includes("API_KEY_INVALID") || error.message?.includes("invalid") || error.message === "MISSING_KEY") {
@@ -610,6 +687,9 @@ export default function App() {
               onRefresh={handleRefresh}
               onFastForward={handleFastForward}
               onEditLastMessage={handleEditLastMessage}
+              onEditMessage={handleEditMessage}
+              onDeleteMessage={handleDeleteMessage}
+              onSelectVariant={handleSelectVariant}
               onOpenSettings={() => setIsSettingsModalOpen(true)}
               onOpenNotebook={() => {
                 setSidebarTab("notebook");
