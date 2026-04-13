@@ -2,7 +2,7 @@ import React from "react";
 import { cn } from "../lib/utils";
 import { CHAR_AVATAR } from "../constants";
 import { useSettings } from "../contexts/SettingsContext";
-import { Heart, Skull, Copy, Edit2, Trash2 } from "lucide-react";
+import { Heart, Skull, Copy, Edit2, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
 interface MessageItemProps {
@@ -11,6 +11,9 @@ interface MessageItemProps {
   userName: string;
   scoreChange?: number;
   charAvatar: string;
+  variantsCount?: number;
+  currentVariantIndex?: number;
+  onSelectVariant?: (index: number) => void;
   onCopy?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
@@ -22,6 +25,9 @@ export const MessageItem: React.FC<MessageItemProps> = ({
   userName,
   scoreChange,
   charAvatar,
+  variantsCount,
+  currentVariantIndex,
+  onSelectVariant,
   onCopy,
   onEdit,
   onDelete,
@@ -121,6 +127,29 @@ export const MessageItem: React.FC<MessageItemProps> = ({
                   <Skull className="w-4 h-4 text-gray-800 dark:text-gray-200" />
                 </motion.div>
               )}
+            </div>
+          )}
+
+          {/* Variants Navigation */}
+          {isAssistant && variantsCount && variantsCount > 1 && currentVariantIndex !== undefined && onSelectVariant && (
+            <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-200 dark:border-gray-700/50 text-xs text-gray-400">
+              <button
+                onClick={() => onSelectVariant(currentVariantIndex - 1)}
+                disabled={currentVariantIndex === 0}
+                className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors disabled:opacity-30 disabled:hover:bg-transparent"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <span className="font-mono">
+                {currentVariantIndex + 1} / {variantsCount}
+              </span>
+              <button
+                onClick={() => onSelectVariant(currentVariantIndex + 1)}
+                disabled={currentVariantIndex === variantsCount - 1}
+                className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors disabled:opacity-30 disabled:hover:bg-transparent"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
             </div>
           )}
         </div>
