@@ -144,49 +144,49 @@ export const SIDE_CHARACTERS: SideCharacter[] = [
   },
   {
     name: "Mợ Hai - Thiên Kim",
-    role: "Vợ cả (20 tuổi)",
+    role: "Vợ cả của {{char}} (20 tuổi)",
     gender: "Nữ",
     description: "Con gái quan Tuần phủ. Đẹp nền nã nhưng tâm địa nham hiểm như rắn rết. Ghen tuông đố kị, luôn tìm cách vu oan giá họa cho {{user}} thân tàn ma dại."
   },
   {
     name: "Quan Tuần phủ - Lê Tấn Lộc",
-    role: "Cha vợ của {{char}} (58 tuổi)",
+    role: "Cha vợ của {{char}}, cha của Thiên Kim (58 tuổi)",
     gender: "Nam",
     description: "Tham lam, hống hách. Tin tưởng Phục mù quáng, đang bị Phục lợi dụng đứng tên buôn lậu vũ khí để sau này chiếm đoạt gia sản."
   },
   {
     name: "Tám Sang",
-    role: "Tài xế kiêm hầu thân cận (30 tuổi)",
+    role: "Tài xế kiêm hầu thân cận của {{char}} (30 tuổi)",
     gender: "Nam",
     description: "Lái chiếc Citroën bóng lộn. Sành sỏi mọi chốn ăn chơi, kín miệng như bưng. Hãnh diện vì được hầu hạ Cậu Hai."
   },
   {
     name: "Vú Bảy",
-    role: "Quản gia riêng của Phục (50 tuổi)",
+    role: "Quản gia riêng của {{char}} (50 tuổi)",
     gender: "Nữ",
     description: "Vú nuôi tâm phúc, trung thành tuyệt đối. Lầm lì, là tai mắt của Phục, chăm sóc {{user}} khi cậu đi vắng."
   },
   {
     name: "Mụ Lợi",
-    role: "Quản gia (43 tuổi)",
+    role: "Hầu thân cận của Bà Hội Đồng (43 tuổi)",
     gender: "Nữ",
     description: "Tay sai của Bà Hội đồng. Chua ngoa, cay nghiệt, chuyên soi mói và tìm cớ phạt vạ {{user}} để lấy lòng chủ."
   },
   {
     name: "Lài",
-    role: "Người ở (17 tuổi)",
+    role: "Người ở, bạn thân của {{user}} (17 tuổi)",
     gender: "Nữ",
     description: "Bạn thân của {{user}}. Nhút nhát, sợ Cậu Hai, thương {{user}} nhưng chỉ dám lén lút giúp đỡ."
   },
   {
     name: "Cò",
-    role: "Gia đinh (12 tuổi)",
+    role: "Gia đinh, bạn thân của {{user}} (12 tuổi)",
     gender: "Nam",
     description: "Ngây ngô, hay bị Cậu Hai đá đít vì tội lanh chanh. Đôi khi vô tình để lộ tin tức bên ngoài cho {{user}}."
   },
   {
     name: "Sen",
-    role: "Hầu riêng Mợ Lớn (19 tuổi)",
+    role: "Hầu riêng Thiên Kim (19 tuổi)",
     gender: "Nữ",
     description: "Đanh đá, trơ trẽn. Tai mắt của Thiên Kim, chuyên rình mò đặt điều nói xấu {{user}} để kích bác đánh ghen."
   }
@@ -206,7 +206,7 @@ export const GEMINI_MODELS: GeminiModel[] = [
     price: "500 phản hồi/ngày (Miễn phí)"
   },
   { 
-    id: "gemini-1.5-flash", 
+    id: "gemini-2.5-flash", 
     name: "Gemini 2.5 Flash",
     description: "Phiên bản ổn định, mượt mà. Đảm bảo mạch truyện luôn trôi chảy.",
     price: "20 phản hồi/ngày (Miễn phí)"
