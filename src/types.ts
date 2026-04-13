@@ -87,6 +87,7 @@ export interface MusicState {
   isPlaying: boolean;
   currentSongIndex: number;
   loopMode: 'none' | 'list' | 'single';
+  isShuffle: boolean;
   discPosition?: { x: number; y: number };
   isDiscVisible: boolean;
 }
