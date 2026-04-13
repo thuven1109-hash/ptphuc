@@ -17,6 +17,8 @@ interface ChatInterfaceProps {
   onRefresh: () => void;
   onFastForward: () => void;
   onEditLastMessage: (content: string) => void;
+  onEditMessage: (id: string, content: string) => void;
+  onDeleteMessage: (id: string) => void;
   onOpenSettings: () => void;
   onOpenNotebook: () => void;
   onOpenMusicPlayer: () => void;
@@ -38,6 +40,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   onRefresh,
   onFastForward,
   onEditLastMessage,
+  onEditMessage,
+  onDeleteMessage,
   onOpenSettings,
   onOpenNotebook,
   onOpenMusicPlayer,
@@ -82,6 +86,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const currentLevel = getCurrentFavorabilityLevel();
 
   // Handle manual scroll detection
+  const [editingMessageId, setEditingMessageId] = React.useState<string | null>(null);
+  const [editingMessageContent, setEditingMessageContent] = React.useState("");
+
   const handleScroll = () => {
     if (scrollRef.current) {
       const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
@@ -212,14 +219,51 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       >
         <div className="max-w-2xl mx-auto relative">
           {messages.map((msg) => (
-            <MessageItem
-              key={msg.id}
-              content={msg.content}
-              role={msg.role}
-              userName={userInfo.name}
-              scoreChange={msg.scoreChange}
-              charAvatar={charAvatar}
-            />
+            <div key={msg.id}>
+              {editingMessageId === msg.id ? (
+                <div className="flex w-full mb-6 justify-end">
+                  <div className="flex max-w-[85%] flex-col gap-2 bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-pink-200 dark:border-gray-700">
+                    <textarea
+                      value={editingMessageContent}
+                      onChange={(e) => setEditingMessageContent(e.target.value)}
+                      className="w-full bg-transparent border-none focus:ring-0 resize-none min-h-[60px] text-[var(--color-text-primary)]"
+                      autoFocus
+                    />
+                    <div className="flex justify-end gap-2">
+                      <button
+                        onClick={() => setEditingMessageId(null)}
+                        className="px-3 py-1.5 text-sm text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                      >
+                        Hủy
+                      </button>
+                      <button
+                        onClick={() => {
+                          onEditMessage(msg.id, editingMessageContent);
+                          setEditingMessageId(null);
+                        }}
+                        className="px-3 py-1.5 text-sm bg-pink-500 text-white hover:bg-pink-600 rounded-lg transition-colors"
+                      >
+                        Lưu
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <MessageItem
+                  content={msg.content}
+                  role={msg.role}
+                  userName={userInfo.name}
+                  scoreChange={msg.scoreChange}
+                  charAvatar={charAvatar}
+                  onCopy={() => navigator.clipboard.writeText(msg.content)}
+                  onEdit={msg.role === "user" ? () => {
+                    setEditingMessageId(msg.id);
+                    setEditingMessageContent(msg.content);
+                  } : undefined}
+                  onDelete={msg.role === "user" ? () => onDeleteMessage(msg.id) : undefined}
+                />
+              )}
+            </div>
           ))}
           
           {isTyping && (
@@ -468,7 +512,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                       </div>
                       <div className="flex flex-col">
                         <span className="font-bold text-sm">Nhật ký</span>
-                        <span className="text-[10px] text-gray-400">Tâm tình của Cậu Út</span>
+                        <span className="text-[10px] text-gray-400">Tâm tình của {PUBLIC_INFO.name}</span>
                       </div>
                     </button>
                     <button
@@ -492,18 +536,18 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             </AnimatePresence>
           </div>
 
-          <form onSubmit={handleSend} className="flex-1 flex items-center gap-2">
-            <input
-              type="text"
+          <form onSubmit={handleSend} className="flex-1 flex items-end gap-2">
+            <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Nhập tin nhắn..."
-              className="flex-1 px-5 py-3 bg-pink-50 dark:bg-gray-800 border border-pink-100 dark:border-gray-700 rounded-full focus:outline-none focus:ring-2 focus:ring-[#ffb6c1] transition-all text-[var(--color-text-primary)]"
+              className="flex-1 px-5 py-3 bg-pink-50 dark:bg-gray-800 border border-pink-100 dark:border-gray-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#ffb6c1] transition-all text-[var(--color-text-primary)] resize-none min-h-[48px] max-h-32 custom-scrollbar"
+              rows={1}
             />
             <button
               type="submit"
               disabled={!input.trim() || isTyping}
-              className="p-3 bg-[#ff99cc] text-white rounded-full shadow-lg shadow-pink-100 dark:shadow-none disabled:opacity-50 disabled:shadow-none transition-all active:scale-90"
+              className="p-3 bg-[#ff99cc] text-white rounded-full shadow-lg shadow-pink-100 dark:shadow-none disabled:opacity-50 disabled:shadow-none transition-all active:scale-90 mb-1"
             >
               <Send className="w-6 h-6" />
             </button>
