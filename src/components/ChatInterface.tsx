@@ -231,12 +231,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                     />
                     <div className="flex justify-end gap-2">
                       <button
+                        onMouseDown={(e) => e.preventDefault()}
                         onClick={() => setEditingMessageId(null)}
                         className="px-3 py-1.5 text-sm text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                       >
                         Hủy
                       </button>
                       <button
+                        onMouseDown={(e) => e.preventDefault()}
                         onClick={() => {
                           onEditMessage(msg.id, editingMessageContent);
                           setEditingMessageId(null);
