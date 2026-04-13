@@ -13,12 +13,19 @@ export interface UserInfo {
   background: string;
 }
 
+export interface MessageVariant {
+  content: string;
+  scoreChange?: number;
+}
+
 export interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   timestamp: number;
   scoreChange?: number;
+  variants?: MessageVariant[];
+  currentVariantIndex?: number;
 }
 
 export interface DiaryEntry {
