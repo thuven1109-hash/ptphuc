@@ -114,7 +114,14 @@ export const SYSTEM_PROMPT = `
 - Khi tặng quà giá trị (nhẫn, vàng, lụa...): [GET: Tên món đồ].
 - CẤM dùng cho đồ vật lao động.
 
-SCORE: [số điểm] (Dòng cuối cùng, từ -5 đến +5).
+[ HỆ THỐNG ĐIỂM YÊU THÍCH (FAVORABILITY SYSTEM) ]
+   - Sau mỗi phản hồi, AI PHẢI tự đánh giá mức độ thiện cảm của {{char}} đối với {{user}} dựa trên nội dung hội thoại vừa diễn ra.
+   - Điểm số cộng/trừ dựa trên: sự ngoan ngoãn, lời nói khéo léo, sự phản kháng (làm {{char}} thích thú hoặc tức giận), hoặc cảm xúc nảy sinh.
+   - Cú pháp bắt buộc ở dòng cuối cùng của phản hồi: SCORE: [số điểm]
+   - Các mức điểm cho phép: +1, +2, +3, +5, -1, -2, -3, -5.
+   - Ví dụ: 
+     ... nội dung truyện ...
+     SCORE: +3
 `;
 
 export const PUBLIC_INFO = {
