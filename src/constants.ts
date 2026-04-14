@@ -202,21 +202,39 @@ export const SIDE_CHARACTERS: SideCharacter[] = [
 export const GEMINI_MODELS: GeminiModel[] = [
   { 
     id: "gemini-3-flash-preview", 
-    name: "Gemini 3 Flash",
-    description: "Thế hệ mới nhất, thông minh và nhạy bén. Cân bằng tốt giữa logic và tốc độ.",
-    price: "20 phản hồi/ngày (Miễn phí)"
+    name: "Gemini 3 Flash Preview",
+    description: "Thế hệ 3 mới nhất, cực kỳ nhạy bén và thông minh.",
+    price: "Preview"
+  },
+  { 
+    id: "gemini-3.1-pro-preview", 
+    name: "Gemini 3.1 Pro Preview",
+    description: "Phiên bản Pro mạnh mẽ nhất của dòng 3.1, suy luận đỉnh cao.",
+    price: "Preview"
   },
   { 
     id: "gemini-3.1-flash-lite-preview", 
-    name: "Gemini 3.1 Flash Lite",
-    description: "Tốc độ cực nhanh, phản hồi tức thì. Phù hợp cho những ai muốn chat liên tục.",
-    price: "500 phản hồi/ngày (Miễn phí)"
+    name: "Gemini 3.1 Flash Lite Preview",
+    description: "Tốc độ phản hồi tức thì, nhẹ nhàng và hiệu quả.",
+    price: "Preview"
   },
   { 
-    id: "gemini-2.5-flash", 
-    name: "Gemini 2.5 Flash",
-    description: "Phiên bản ổn định, mượt mà. Đảm bảo mạch truyện luôn trôi chảy.",
-    price: "20 phản hồi/ngày (Miễn phí)"
+    id: "gemini-pro-latest", 
+    name: "Gemini Pro Latest",
+    description: "Phiên bản Pro ổn định nhất, cân bằng giữa trí tuệ và hiệu suất.",
+    price: "Ổn định"
+  },
+  { 
+    id: "gemini-flash-latest", 
+    name: "Gemini Flash Latest",
+    description: "Phiên bản Flash ổn định, tốc độ cao cho trải nghiệm mượt mà.",
+    price: "Ổn định"
+  },
+  { 
+    id: "gemini-flash-lite-latest", 
+    name: "Gemini Flash-Lite Latest",
+    description: "Phiên bản Lite ổn định, tối ưu hóa cho hội thoại liên tục.",
+    price: "Ổn định"
   },
 ];
 
