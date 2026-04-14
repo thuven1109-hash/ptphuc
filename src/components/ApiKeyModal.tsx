@@ -14,7 +14,7 @@ interface ApiKeyModalProps {
 
 export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onSave, onClose, error, initialModel }) => {
   const [inputKey, setInputKey] = React.useState("");
-  const [selectedModel, setSelectedModel] = React.useState(initialModel || "gemini-flash-latest");
+  const [selectedModel, setSelectedModel] = React.useState(initialModel || "gemini-3-flash-preview");
   const [isValidating, setIsValidating] = React.useState(false);
   const [localError, setLocalError] = React.useState<string | null>(null);
 
