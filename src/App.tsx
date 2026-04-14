@@ -9,8 +9,6 @@ import { motion, AnimatePresence } from "motion/react";
 import { ApiKeyModal } from "./components/ApiKeyModal";
 import { SettingsModal } from "./components/SettingsModal";
 import { MusicPlayer, FloatingMusicDisc } from "./components/MusicPlayer";
-import { useFirestoreSync } from "./hooks/useFirestoreSync";
-import { LogIn, LogOut } from "lucide-react";
 
 const STORAGE_KEY = "hoi_uc_nam_ky_sessions";
 const API_KEY_STORAGE = "user_api_key";
@@ -36,7 +34,7 @@ export default function App() {
 
   // API Key & Model State
   const [apiKey, setApiKey] = React.useState<string | null>(() => localStorage.getItem(API_KEY_STORAGE));
-  const [selectedModel, setSelectedModel] = React.useState<string>(() => localStorage.getItem(MODEL_STORAGE) || "gemini-3.1-flash-lite-preview");
+  const [selectedModel, setSelectedModel] = React.useState<string>(() => localStorage.getItem(MODEL_STORAGE) || "gemini-flash-latest");
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = React.useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = React.useState(false);
   const [apiKeyError, setApiKeyError] = React.useState<string | null>(null);
@@ -64,39 +62,6 @@ export default function App() {
   });
   const [isMusicPlayerOpen, setIsMusicPlayerOpen] = React.useState(false);
 
-  const {
-    user,
-    isAuthReady,
-    login,
-    logout,
-    syncUserDataToFirestore,
-    syncSessionToFirestore,
-    deleteSessionFromFirestore
-  } = useFirestoreSync(
-    setSessions,
-    setUserProfiles,
-    setMusicState,
-    setApiKey,
-    setSelectedModel
-  );
-
-  // Sync user data to Firestore when it changes
-  React.useEffect(() => {
-    if (user) {
-      syncUserDataToFirestore(apiKey, selectedModel, userProfiles, musicState);
-    }
-  }, [apiKey, selectedModel, userProfiles, musicState, user]);
-
-  // Sync current session to Firestore when it changes
-  React.useEffect(() => {
-    if (user && currentSessionId) {
-      const session = sessions.find(s => s.id === currentSessionId);
-      if (session) {
-        syncSessionToFirestore(session);
-      }
-    }
-  }, [sessions, currentSessionId, user]);
-
   const handleUpdateUserInfo = (info: UserInfo) => {
     if (!currentSessionId) return;
     setSessions((prev) =>
@@ -105,15 +70,11 @@ export default function App() {
     showToast("Đã cập nhật hồ sơ của bạn");
   };
 
-  const handleUpdateModel = (model: string) => {
-    setSelectedModel(model);
-    localStorage.setItem(MODEL_STORAGE, model);
-  };
-
   const handleSaveApiKey = (key: string, model: string) => {
     localStorage.setItem(API_KEY_STORAGE, key);
-    handleUpdateModel(model);
+    localStorage.setItem(MODEL_STORAGE, model);
     setApiKey(key);
+    setSelectedModel(model);
     setIsApiKeyModalOpen(false);
     setApiKeyError(null);
   };
@@ -586,7 +547,6 @@ export default function App() {
         currentSession.messages,
         currentSession.userInfo.name,
         currentSession.userInfo.appearance,
-        currentSession.userInfo.personality || "",
         apiKey,
         selectedModel,
         diaryPrompt
@@ -688,9 +648,6 @@ export default function App() {
 
   const handleDeleteSession = (id: string) => {
     setSessions(sessions.filter((s) => s.id !== id));
-    if (user) {
-      deleteSessionFromFirestore(id);
-    }
     if (currentSessionId === id) setCurrentSessionId(null);
   };
 
@@ -708,9 +665,6 @@ export default function App() {
               onStart={handleStartChat} 
               onToggleSidebar={() => setIsSidebarOpen(true)}
               userProfiles={userProfiles}
-              user={user}
-              onLogin={login}
-              onLogout={logout}
             />
           </motion.div>
         ) : (
@@ -799,8 +753,6 @@ export default function App() {
           onUpdateUserInfo={handleUpdateUserInfo}
           userProfiles={userProfiles}
           onUpdateUserProfiles={setUserProfiles}
-          selectedModel={selectedModel}
-          onUpdateModel={handleUpdateModel}
         />
       )}
 
