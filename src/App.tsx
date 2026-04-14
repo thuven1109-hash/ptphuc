@@ -70,11 +70,15 @@ export default function App() {
     showToast("Đã cập nhật hồ sơ của bạn");
   };
 
+  const handleUpdateModel = (model: string) => {
+    setSelectedModel(model);
+    localStorage.setItem(MODEL_STORAGE, model);
+  };
+
   const handleSaveApiKey = (key: string, model: string) => {
     localStorage.setItem(API_KEY_STORAGE, key);
-    localStorage.setItem(MODEL_STORAGE, model);
+    handleUpdateModel(model);
     setApiKey(key);
-    setSelectedModel(model);
     setIsApiKeyModalOpen(false);
     setApiKeyError(null);
   };
@@ -547,6 +551,7 @@ export default function App() {
         currentSession.messages,
         currentSession.userInfo.name,
         currentSession.userInfo.appearance,
+        currentSession.userInfo.personality || "",
         apiKey,
         selectedModel,
         diaryPrompt
@@ -753,6 +758,8 @@ export default function App() {
           onUpdateUserInfo={handleUpdateUserInfo}
           userProfiles={userProfiles}
           onUpdateUserProfiles={setUserProfiles}
+          selectedModel={selectedModel}
+          onUpdateModel={handleUpdateModel}
         />
       )}
 
