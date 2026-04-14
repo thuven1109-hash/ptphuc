@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { X, User, Type, Moon, Sun, ALargeSmall, Check, Plus, Trash2, Pencil } from "lucide-react";
 import { useSettings, Theme, FontSize, FontType } from "../contexts/SettingsContext";
 import { UserInfo, UserProfile } from "../types";
+import { GEMINI_MODELS } from "../constants";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -11,6 +12,8 @@ interface SettingsModalProps {
   onUpdateUserInfo: (info: UserInfo) => void;
   userProfiles: UserProfile[];
   onUpdateUserProfiles: React.Dispatch<React.SetStateAction<UserProfile[]>>;
+  selectedModel: string;
+  onUpdateModel: (model: string) => void;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -20,6 +23,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onUpdateUserInfo,
   userProfiles,
   onUpdateUserProfiles,
+  selectedModel,
+  onUpdateModel,
 }) => {
   const { settings, updateSettings } = useSettings();
   const [activeTab, setActiveTab] = useState<"profile" | "appearance">("profile");
@@ -169,6 +174,22 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   className="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-transparent focus:ring-2 focus:ring-pink-500 outline-none resize-none"
                 />
               </div>
+
+              <div className="pt-2">
+                <label className="block text-sm font-medium text-gray-500 mb-1">Model AI</label>
+                <select
+                  value={selectedModel}
+                  onChange={(e) => onUpdateModel(e.target.value)}
+                  className="w-full p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-transparent focus:ring-2 focus:ring-pink-500 outline-none"
+                >
+                  {GEMINI_MODELS.map((m) => (
+                    <option key={m.id} value={m.id} className="bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)]">
+                      {m.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <button
                 onClick={handleSaveProfile}
                 className="w-full py-3 bg-pink-500 text-white rounded-xl font-bold hover:bg-pink-600 transition-colors shadow-lg shadow-pink-200 dark:shadow-none"
