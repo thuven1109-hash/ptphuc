@@ -34,7 +34,7 @@ export default function App() {
 
   // API Key & Model State
   const [apiKey, setApiKey] = React.useState<string | null>(() => localStorage.getItem(API_KEY_STORAGE));
-  const [selectedModel, setSelectedModel] = React.useState<string>(() => localStorage.getItem(MODEL_STORAGE) || "gemini-flash-latest");
+  const [selectedModel, setSelectedModel] = React.useState<string>(() => localStorage.getItem(MODEL_STORAGE) || "gemini-3-flash-preview");
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = React.useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = React.useState(false);
   const [apiKeyError, setApiKeyError] = React.useState<string | null>(null);
