@@ -9,6 +9,8 @@ import { motion, AnimatePresence } from "motion/react";
 import { ApiKeyModal } from "./components/ApiKeyModal";
 import { SettingsModal } from "./components/SettingsModal";
 import { MusicPlayer, FloatingMusicDisc } from "./components/MusicPlayer";
+import { useFirestoreSync } from "./hooks/useFirestoreSync";
+import { LogIn, LogOut } from "lucide-react";
 
 const STORAGE_KEY = "hoi_uc_nam_ky_sessions";
 const API_KEY_STORAGE = "user_api_key";
@@ -61,6 +63,39 @@ export default function App() {
     return defaultState;
   });
   const [isMusicPlayerOpen, setIsMusicPlayerOpen] = React.useState(false);
+
+  const {
+    user,
+    isAuthReady,
+    login,
+    logout,
+    syncUserDataToFirestore,
+    syncSessionToFirestore,
+    deleteSessionFromFirestore
+  } = useFirestoreSync(
+    setSessions,
+    setUserProfiles,
+    setMusicState,
+    setApiKey,
+    setSelectedModel
+  );
+
+  // Sync user data to Firestore when it changes
+  React.useEffect(() => {
+    if (user) {
+      syncUserDataToFirestore(apiKey, selectedModel, userProfiles, musicState);
+    }
+  }, [apiKey, selectedModel, userProfiles, musicState, user]);
+
+  // Sync current session to Firestore when it changes
+  React.useEffect(() => {
+    if (user && currentSessionId) {
+      const session = sessions.find(s => s.id === currentSessionId);
+      if (session) {
+        syncSessionToFirestore(session);
+      }
+    }
+  }, [sessions, currentSessionId, user]);
 
   const handleUpdateUserInfo = (info: UserInfo) => {
     if (!currentSessionId) return;
@@ -653,6 +688,9 @@ export default function App() {
 
   const handleDeleteSession = (id: string) => {
     setSessions(sessions.filter((s) => s.id !== id));
+    if (user) {
+      deleteSessionFromFirestore(id);
+    }
     if (currentSessionId === id) setCurrentSessionId(null);
   };
 
@@ -670,6 +708,9 @@ export default function App() {
               onStart={handleStartChat} 
               onToggleSidebar={() => setIsSidebarOpen(true)}
               userProfiles={userProfiles}
+              user={user}
+              onLogin={login}
+              onLogout={logout}
             />
           </motion.div>
         ) : (
