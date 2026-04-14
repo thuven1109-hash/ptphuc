@@ -201,27 +201,27 @@ export const SIDE_CHARACTERS: SideCharacter[] = [
 
 export const GEMINI_MODELS: GeminiModel[] = [
   { 
-    id: "gemini-3-flash", 
+    id: "gemini-3-flash-preview", 
     name: "Gemini 3 Flash",
     description: "Thế hệ 3 mới nhất, cực kỳ nhạy bén và thông minh.",
     price: "Preview"
   },
   { 
-    id: "gemini-3.1-pro", 
+    id: "gemini-3.1-pro-preview", 
     name: "Gemini 3.1 Pro",
     description: "Phiên bản Pro mạnh mẽ nhất của dòng 3.1, suy luận đỉnh cao.",
     price: "Preview"
   },
   { 
-    id: "gemini-3.1-flash-lite", 
+    id: "gemini-3.1-flash-lite-preview", 
     name: "Gemini 3.1 Flash Lite",
     description: "Tốc độ phản hồi tức thì, nhẹ nhàng và hiệu quả.",
     price: "Preview"
   },
   { 
-    id: "gemini-pro-latest", 
-    name: "Gemini Pro Latest",
-    description: "Phiên bản Pro ổn định nhất, cân bằng giữa trí tuệ và hiệu suất.",
+    id: "gemini-flash-latest", 
+    name: "Gemini Flash Latest",
+    description: "Phiên bản Flash ổn định, tốc độ cao cho trải nghiệm mượt mà.",
     price: "Ổn định"
   },
 ];
