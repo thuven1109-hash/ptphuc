@@ -114,13 +114,13 @@ export const InventoryPopup: React.FC<InventoryPopupProps> = ({
                       onClick={() => handleActionClick(actingItem, "show")}
                       className="py-2.5 bg-pink-50 dark:bg-pink-900/20 text-pink-500 rounded-xl text-xs font-bold hover:bg-pink-100 transition-colors"
                     >
-                      Khoe với Cậu Út
+                      Khoe với {charName}
                     </button>
                     <button
                       onClick={() => handleActionClick(actingItem, "gift")}
                       className="py-2.5 bg-pink-500 text-white rounded-xl text-xs font-bold hover:bg-pink-600 transition-colors shadow-lg shadow-pink-100 dark:shadow-none"
                     >
-                      Tặng cho Cậu Út
+                      Tặng cho {charName}
                     </button>
                     <button
                       onClick={() => setActingItem(null)}
