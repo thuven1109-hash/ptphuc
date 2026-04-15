@@ -12,6 +12,7 @@ import { MusicPlayer, FloatingMusicDisc } from "./components/MusicPlayer";
 
 const STORAGE_KEY = "hoi_uc_nam_ky_sessions";
 const API_KEY_STORAGE = "user_api_key";
+const API_KEYS_LIST_STORAGE = "user_api_keys_list";
 const MODEL_STORAGE = "selectedModel";
 const NOTEBOOK_STORAGE = "user_notebook_content";
 const NOTEBOOK_ENABLED_STORAGE = "user_notebook_enabled";
@@ -34,6 +35,17 @@ export default function App() {
 
   // API Key & Model State
   const [apiKey, setApiKey] = React.useState<string | null>(() => localStorage.getItem(API_KEY_STORAGE));
+  const [savedApiKeys, setSavedApiKeys] = React.useState<string[]>(() => {
+    const saved = localStorage.getItem(API_KEYS_LIST_STORAGE);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        return [];
+      }
+    }
+    return [];
+  });
   const [selectedModel, setSelectedModel] = React.useState<string>(() => localStorage.getItem(MODEL_STORAGE) || "gemini-3-flash-preview");
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = React.useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = React.useState(false);
@@ -73,10 +85,30 @@ export default function App() {
   const handleSaveApiKey = (key: string, model: string) => {
     localStorage.setItem(API_KEY_STORAGE, key);
     localStorage.setItem(MODEL_STORAGE, model);
+    
+    // Add to list if not already there
+    if (!savedApiKeys.includes(key)) {
+      const newList = [key, ...savedApiKeys];
+      setSavedApiKeys(newList);
+      localStorage.setItem(API_KEYS_LIST_STORAGE, JSON.stringify(newList));
+    }
+
     setApiKey(key);
     setSelectedModel(model);
     setIsApiKeyModalOpen(false);
     setApiKeyError(null);
+  };
+
+  const handleDeleteSavedKey = (key: string) => {
+    const newList = savedApiKeys.filter(k => k !== key);
+    setSavedApiKeys(newList);
+    localStorage.setItem(API_KEYS_LIST_STORAGE, JSON.stringify(newList));
+    
+    // If the deleted key was the current one, clear it
+    if (apiKey === key) {
+      localStorage.removeItem(API_KEY_STORAGE);
+      setApiKey(null);
+    }
   };
 
   // Load sessions from localStorage
@@ -743,6 +775,8 @@ export default function App() {
         onClose={() => setIsApiKeyModalOpen(false)}
         error={apiKeyError}
         initialModel={selectedModel}
+        savedKeys={savedApiKeys}
+        onDeleteKey={handleDeleteSavedKey}
       />
 
       {currentSession && (
