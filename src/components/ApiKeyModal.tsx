@@ -1,6 +1,6 @@
 import React from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Key, ExternalLink, AlertCircle, Cpu, Loader2, X } from "lucide-react";
+import { Key, ExternalLink, AlertCircle, Cpu, Loader2, X, Trash2, CheckCircle2 } from "lucide-react";
 import { GEMINI_MODELS } from "../constants";
 import { validateApiKey } from "../services/gemini";
 
@@ -10,17 +10,26 @@ interface ApiKeyModalProps {
   onClose?: () => void;
   error?: string | null;
   initialModel?: string;
+  savedKeys?: string[];
+  onDeleteKey?: (key: string) => void;
 }
 
-export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onSave, onClose, error, initialModel }) => {
+export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ 
+  isOpen, 
+  onSave, 
+  onClose, 
+  error, 
+  initialModel,
+  savedKeys = [],
+  onDeleteKey
+}) => {
   const [inputKey, setInputKey] = React.useState("");
-  const [selectedModel, setSelectedModel] = React.useState(initialModel || "gemini-3-flash-preview");
+  const [selectedModel, setSelectedModel] = React.useState(initialModel || "gemini-flash-latest");
   const [isValidating, setIsValidating] = React.useState(false);
   const [localError, setLocalError] = React.useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmedKey = inputKey.trim();
+  const handleValidateAndSave = async (key: string) => {
+    const trimmedKey = key.trim();
     if (!trimmedKey) return;
 
     setIsValidating(true);
@@ -34,6 +43,11 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onSave, onClos
     } else {
       setLocalError("Mã API Key không hợp lệ hoặc không có quyền truy cập vào Model này. Vui lòng kiểm tra lại.");
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    handleValidateAndSave(inputKey);
   };
 
   const displayError = localError || error;
@@ -131,6 +145,57 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onSave, onClos
                     required
                   />
                 </div>
+
+                {savedKeys.length > 0 && (
+                  <div className="space-y-3">
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">
+                      Mã đã lưu ({savedKeys.length})
+                    </label>
+                    <div className="max-h-40 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+                      {savedKeys.map((key, index) => (
+                        <div 
+                          key={index}
+                          className="group flex items-center gap-2 p-3 bg-pink-50/30 dark:bg-gray-800/30 border border-pink-100/30 dark:border-gray-700/50 rounded-xl hover:border-pink-200 dark:hover:border-gray-600 transition-all"
+                        >
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setInputKey(key);
+                              // Optional: Auto-submit
+                              // handleSubmit(new Event('submit') as any);
+                            }}
+                            className="flex-1 text-left text-xs font-mono text-[var(--color-text-secondary)] truncate hover:text-[#ff99cc] transition-colors"
+                          >
+                            {key.substring(0, 8)}••••••••{key.substring(key.length - 4)}
+                          </button>
+                          {inputKey === key ? (
+                            <CheckCircle2 className="w-4 h-4 text-green-500" />
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setInputKey(key);
+                                handleValidateAndSave(key);
+                              }}
+                              className="text-[10px] font-bold text-[#ff99cc] hover:underline"
+                            >
+                              Sử dụng
+                            </button>
+                          )}
+                          {onDeleteKey && (
+                            <button
+                              type="button"
+                              onClick={() => onDeleteKey(key)}
+                              className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <button
                   type="submit"
