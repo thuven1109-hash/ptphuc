@@ -1,0 +1,17 @@
+{
+  "name": "Quan Đốc Phủ Nam",
+  "short_name": "Quan Đốc",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFF0F5",
+  "theme_color": "#ff99cc",
+  "description": "Trả thù hay tha thứ?",
+  "icons": [
+    {
+      "src": "https://lh3.googleusercontent.com/u/0/d/1laf8bUmZlCgzGqzUOyQNsbkF8TVopAaK",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
