@@ -568,7 +568,7 @@ export const FloatingMusicDisc: React.FC<{
 
         {/* Tooltip */}
         <div className="absolute top-full right-0 mt-3 bg-white dark:bg-gray-800 text-[10px] font-black text-pink-400 px-3 py-1.5 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border-2 border-pink-100 dark:border-pink-900/30 uppercase tracking-tighter">
-          Giai điệu của Cậu
+          Giai điệu của bạn
         </div>
       </button>
     </motion.div>
