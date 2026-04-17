@@ -3,7 +3,7 @@ import { IntroScreen } from "./components/IntroScreen";
 import { ChatInterface } from "./components/ChatInterface";
 import { Sidebar } from "./components/Sidebar";
 import { UserInfo, ChatSession, Message, CustomSideCharacter, DiaryEntry, MusicState, UserProfile } from "./types";
-import { FIRST_MESSAGE, CHAR_AVATAR, PUBLIC_INFO } from "./constants";
+import { FIRST_MESSAGE, CHAR_AVATAR, PUBLIC_INFO, GEMINI_MODELS } from "./constants";
 import { sendMessage } from "./services/gemini";
 import { motion, AnimatePresence } from "motion/react";
 import { ApiKeyModal } from "./components/ApiKeyModal";
@@ -50,6 +50,7 @@ export default function App() {
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = React.useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = React.useState(false);
   const [apiKeyError, setApiKeyError] = React.useState<string | null>(null);
+  const [lastError, setLastError] = React.useState<{ message: string; sessionId: string } | null>(null);
 
   // Music State
   const [musicState, setMusicState] = React.useState<MusicState>(() => {
@@ -323,6 +324,7 @@ export default function App() {
     );
 
     setIsTyping(true);
+    setLastError(null);
     try {
       if (!apiKey) throw new Error("MISSING_KEY");
       
@@ -350,6 +352,7 @@ export default function App() {
         setApiKeyError("Mã Key không hợp lệ, vui lòng kiểm tra lại");
         setIsApiKeyModalOpen(true);
       } else {
+        setLastError({ message: error.message || "Unknown error", sessionId: currentSessionId });
         showToast("Có lỗi xảy ra khi kết nối với nhân vật...");
       }
     } finally {
@@ -417,6 +420,51 @@ export default function App() {
       )
     );
     showToast("Đã xóa tin nhắn");
+  };
+
+  const handleRetry = async () => {
+    if (!lastError || !currentSessionId || !currentSession) return;
+    
+    // The message that needs a response is the last user message
+    const lastUserMessage = [...currentSession.messages].reverse().find(m => m.role === "user");
+    if (!lastUserMessage) return;
+
+    setIsTyping(true);
+    setLastError(null);
+    
+    try {
+      if (!apiKey) throw new Error("MISSING_KEY");
+      
+      let additionalPrompt = "";
+      if (notebookEvents.length > 0) {
+        additionalPrompt += `SỔ TAY SỰ KIỆN (Ghi nhớ quan trọng):\n${notebookEvents.map((e, i) => `${i+1}. ${e}`).join("\n")}\n\n`;
+      }
+      if (customCharacters.length > 0) {
+        additionalPrompt += `NHÂN VẬT PHỤ MỚI XUẤT HIỆN:\n${customCharacters.map(c => `- ${c.name} (${c.gender}): ${c.role}. ${c.description}`).join("\n")}\n\n`;
+      }
+
+      const response = await sendMessage(
+        currentSession.messages,
+        currentSession.userInfo.name,
+        currentSession.userInfo.appearance,
+        currentSession.userInfo.personality || "",
+        apiKey,
+        selectedModel,
+        additionalPrompt
+      );
+      processAIResponse(response, currentSessionId);
+    } catch (error: any) {
+      console.error(error);
+      if (error.message?.includes("API_KEY_INVALID") || error.message?.includes("invalid") || error.message === "MISSING_KEY") {
+        setApiKeyError("Mã Key không hợp lệ, vui lòng kiểm tra lại");
+        setIsApiKeyModalOpen(true);
+      } else {
+        setLastError({ message: error.message || "Unknown error", sessionId: currentSessionId });
+        showToast("Có lỗi xảy ra khi kết nối với nhân vật...");
+      }
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   const handleSelectVariant = (messageId: string, variantIndex: number) => {
@@ -733,8 +781,10 @@ export default function App() {
               diaryEntries={diaryEntries}
               onUseItem={() => {}} // Handled inside ChatInterface
               isTyping={isTyping}
-              modelName={selectedModel}
+              modelName={GEMINI_MODELS.find(m => m.id === selectedModel)?.name || selectedModel}
               charAvatar={currentSession.charAvatar || CHAR_AVATAR}
+              hasError={!!lastError && lastError.sessionId === currentSessionId}
+              onRetry={handleRetry}
             />
           </motion.div>
         )}
