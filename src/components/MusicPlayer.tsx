@@ -37,17 +37,51 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
       tag.src = "https://www.youtube.com/iframe_api";
       const firstScriptTag = document.getElementsByTagName('script')[0];
       firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+    } else {
+      // If API already exists, we might need to trigger player creation
+      initPlayer();
     }
 
     // @ts-ignore
     window.onYouTubeIframeAPIReady = () => {
-      console.log("YouTube API Ready");
+      initPlayer();
+    };
+
+    return () => {
+      if (playerRef.current) {
+        playerRef.current.destroy();
+        playerRef.current = null;
+      }
     };
   }, []);
 
+  const initPlayer = () => {
+    // @ts-ignore
+    if (window.YT && window.YT.Player && !playerRef.current) {
+      const song = musicStateRef.current.playlist[musicStateRef.current.currentSongIndex];
+      // @ts-ignore
+      new window.YT.Player('youtube-player', {
+        height: '100',
+        width: '100',
+        videoId: song?.youtubeId || '',
+        playerVars: {
+          autoplay: musicStateRef.current.isPlaying ? 1 : 0,
+          controls: 0,
+          modestbranding: 1,
+          rel: 0,
+          enablejsapi: 1
+        },
+        events: {
+          onReady: onPlayerReady,
+          onStateChange: onPlayerStateChange,
+        },
+      });
+    }
+  };
+
   const onPlayerReady = (event: any) => {
     playerRef.current = event.target;
-    if (musicState.isPlaying) {
+    if (musicStateRef.current.isPlaying) {
       event.target.playVideo();
     }
   };
@@ -109,6 +143,23 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
       }
     }
   }, [musicState.isPlaying]);
+
+  const currentSong = musicState.playlist[musicState.currentSongIndex];
+
+  React.useEffect(() => {
+    if (playerRef.current && currentSong) {
+      const state = playerRef.current.getPlayerState();
+      // Only load if it's a different video than what's currently loaded
+      const currentVideoUrl = playerRef.current.getVideoUrl?.() || "";
+      if (!currentVideoUrl.includes(currentSong.youtubeId)) {
+        if (musicState.isPlaying) {
+          playerRef.current.loadVideoById(currentSong.youtubeId);
+        } else {
+          playerRef.current.cueVideoById(currentSong.youtubeId);
+        }
+      }
+    }
+  }, [musicState.currentSongIndex, !!currentSong]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -217,35 +268,13 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
     });
   };
 
-  const currentSong = musicState.playlist[musicState.currentSongIndex];
   const playlistIds = musicState.playlist.map(s => s.youtubeId).join(",");
 
   return (
     <>
-      {/* Hidden Iframe for playback */}
-      <div className="fixed -top-10 -left-10 w-1 h-1 opacity-0 pointer-events-none overflow-hidden">
-        {currentSong && (
-          <iframe
-            id="youtube-player"
-            width="100"
-            height="100"
-            src={`https://www.youtube.com/embed/${currentSong.youtubeId}?enablejsapi=1&autoplay=1&mute=0`}
-            title="Music Player"
-            allow="autoplay"
-            onLoad={() => {
-              // @ts-ignore
-              if (window.YT && window.YT.Player) {
-                // @ts-ignore
-                new window.YT.Player('youtube-player', {
-                  events: {
-                    onReady: onPlayerReady,
-                    onStateChange: onPlayerStateChange,
-                  },
-                });
-              }
-            }}
-          ></iframe>
-        )}
+      {/* Persistent Player Placeholder */}
+      <div className="fixed -top-100 -left-100 w-1 h-1 opacity-0 pointer-events-none overflow-hidden">
+        <div id="youtube-player"></div>
       </div>
 
       <AnimatePresence>
