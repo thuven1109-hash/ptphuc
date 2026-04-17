@@ -30,6 +30,8 @@ interface ChatInterfaceProps {
   isTyping: boolean;
   modelName: string;
   charAvatar: string;
+  hasError?: boolean;
+  onRetry?: () => void;
 }
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({
@@ -54,6 +56,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   isTyping,
   modelName,
   charAvatar,
+  hasError,
+  onRetry,
 }) => {
   const [input, setInput] = React.useState("");
   const [isInventoryOpen, setIsInventoryOpen] = React.useState(false);
@@ -267,7 +271,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                     setEditingMessageId(msg.id);
                     setEditingMessageContent(msg.content);
                   } : undefined}
-                  onDelete={msg.role === "user" ? () => onDeleteMessage(msg.id) : undefined}
+                  onDelete={() => onDeleteMessage(msg.id)}
                 />
               )}
             </div>
@@ -282,14 +286,30 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                   className="w-8 h-8 rounded-full border border-pink-200 dark:border-gray-700"
                   referrerPolicy="no-referrer"
                 />
-                <div className="bg-[var(--color-bg-secondary)] p-4 rounded-2xl rounded-bl-none shadow-sm">
+                <div className="bg-[var(--color-bg-secondary)] p-4 rounded-2xl rounded-bl-none shadow-sm text-pink-500 text-xs font-bold flex items-center gap-2">
+                  <span>Nhân vật đang soạn phản hồi...</span>
                   <div className="flex gap-1">
-                    <div className="w-2 h-2 bg-pink-200 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-pink-200 rounded-full animate-bounce [animation-delay:0.2s]"></div>
-                    <div className="w-2 h-2 bg-pink-200 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+                    <div className="w-1.5 h-1.5 bg-pink-300 rounded-full animate-bounce"></div>
+                    <div className="w-1.5 h-1.5 bg-pink-300 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                    <div className="w-1.5 h-1.5 bg-pink-300 rounded-full animate-bounce [animation-delay:0.4s]"></div>
                   </div>
                 </div>
               </div>
+            </div>
+          )}
+
+          {hasError && onRetry && (
+            <div className="flex flex-col items-center gap-4 mb-20">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 text-red-500 rounded-2xl border border-red-100 dark:border-red-900/30 text-center text-sm">
+                Có lỗi xảy ra trong lúc kết nối với Quan Đốc Phủ (Có thể do mạng yếu hoặc API Key hết lượt).
+              </div>
+              <button
+                onClick={onRetry}
+                className="flex items-center gap-2 px-6 py-3 bg-pink-500 text-white rounded-full font-bold hover:bg-pink-600 transition-all active:scale-95 shadow-lg shadow-pink-200"
+              >
+                <RotateCcw className="w-5 h-5" />
+                Thử lại lần nữa
+              </button>
             </div>
           )}
 
