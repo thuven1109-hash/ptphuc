@@ -348,12 +348,14 @@ export default function App() {
       processAIResponse(response, currentSessionId);
     } catch (error: any) {
       console.error(error);
-      if (error.message?.includes("API_KEY_INVALID") || error.message?.includes("invalid") || error.message === "MISSING_KEY") {
+      const errorMessage = error.message || "Lỗi không xác định";
+      
+      if (errorMessage.includes("API_KEY_INVALID") || errorMessage.includes("invalid") || errorMessage === "MISSING_KEY") {
         setApiKeyError("Mã Key không hợp lệ, vui lòng kiểm tra lại");
         setIsApiKeyModalOpen(true);
       } else {
-        setLastError({ message: error.message || "Unknown error", sessionId: currentSessionId });
-        showToast("Có lỗi xảy ra khi kết nối với nhân vật...");
+        setLastError({ message: errorMessage, sessionId: currentSessionId });
+        showToast(errorMessage.length < 100 ? errorMessage : "Có lỗi xảy ra khi kết nối với nhân vật...");
       }
     } finally {
       setIsTyping(false);
@@ -681,9 +683,14 @@ export default function App() {
       processAIResponse(response, currentSessionId, lastMsg.id);
     } catch (error: any) {
       console.error(error);
-      if (error.message?.includes("API_KEY_INVALID") || error.message?.includes("invalid") || error.message === "MISSING_KEY") {
+      const errorMessage = error.message || "Lỗi không xác định";
+
+      if (errorMessage.includes("API_KEY_INVALID") || errorMessage.includes("invalid") || errorMessage === "MISSING_KEY") {
         setApiKeyError("Mã Key không hợp lệ, vui lòng kiểm tra lại");
         setIsApiKeyModalOpen(true);
+      } else {
+        setLastError({ message: errorMessage, sessionId: currentSessionId });
+        showToast(errorMessage.length < 100 ? errorMessage : "Có lỗi xảy ra khi kết nối với nhân vật...");
       }
     } finally {
       setIsTyping(false);
@@ -717,9 +724,14 @@ export default function App() {
       processAIResponse(response, currentSessionId);
     } catch (error: any) {
       console.error(error);
-      if (error.message?.includes("API_KEY_INVALID") || error.message?.includes("invalid") || error.message === "MISSING_KEY") {
+      const errorMessage = error.message || "Lỗi không xác định";
+
+      if (errorMessage.includes("API_KEY_INVALID") || errorMessage.includes("invalid") || errorMessage === "MISSING_KEY") {
         setApiKeyError("Mã Key không hợp lệ, vui lòng kiểm tra lại");
         setIsApiKeyModalOpen(true);
+      } else {
+        setLastError({ message: errorMessage, sessionId: currentSessionId });
+        showToast(errorMessage.length < 100 ? errorMessage : "Có lỗi xảy ra khi kết nối với nhân vật...");
       }
     } finally {
       setIsTyping(false);
