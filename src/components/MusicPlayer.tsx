@@ -1,6 +1,6 @@
 import React from "react";
 import { motion, AnimatePresence, useDragControls } from "motion/react";
-import { Music, Repeat, Trash2, Plus, X, Music2, Heart, Sparkles, Star, Shuffle } from "lucide-react";
+import { Music, Repeat, Trash2, Plus, X, Music2, Heart, Sparkles, Star, Shuffle, SkipBack, SkipForward, Play, Pause } from "lucide-react";
 import { Song, MusicState } from "../types";
 
 interface MusicPlayerProps {
@@ -65,14 +65,14 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
         event.target.playVideo();
       } else if (state.isShuffle) {
         const nextIndex = Math.floor(Math.random() * state.playlist.length);
-        setMusicState(prev => ({ ...prev, currentSongIndex: nextIndex }));
+        setMusicState(prev => ({ ...prev, currentSongIndex: nextIndex, isPlaying: true }));
       } else if (state.loopMode === 'list') {
         const nextIndex = (state.currentSongIndex + 1) % state.playlist.length;
-        setMusicState(prev => ({ ...prev, currentSongIndex: nextIndex }));
+        setMusicState(prev => ({ ...prev, currentSongIndex: nextIndex, isPlaying: true }));
       } else {
         const nextIndex = state.currentSongIndex + 1;
         if (nextIndex < state.playlist.length) {
-          setMusicState(prev => ({ ...prev, currentSongIndex: nextIndex }));
+          setMusicState(prev => ({ ...prev, currentSongIndex: nextIndex, isPlaying: true }));
         } else {
           setMusicState(prev => ({ ...prev, isPlaying: false }));
         }
@@ -188,16 +188,33 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
     setMusicState(prev => ({ ...prev, isPlaying: !prev.isPlaying }));
   };
 
-  const handleLoopClick = () => {
+  const playNext = () => {
     setMusicState(prev => {
-      if (prev.loopMode === "none") return { ...prev, loopMode: "list" };
-      if (prev.loopMode === "list") return { ...prev, loopMode: "none" };
-      return { ...prev, loopMode: "list" };
+      if (prev.playlist.length === 0) return prev;
+      let nextIndex;
+      if (prev.isShuffle) {
+        nextIndex = Math.floor(Math.random() * prev.playlist.length);
+      } else {
+        nextIndex = (prev.currentSongIndex + 1) % prev.playlist.length;
+      }
+      return { ...prev, currentSongIndex: nextIndex, isPlaying: true };
     });
   };
 
-  const handleLoopDoubleClick = () => {
-    setMusicState(prev => ({ ...prev, loopMode: "single" }));
+  const playPrev = () => {
+    setMusicState(prev => {
+      if (prev.playlist.length === 0) return prev;
+      const prevIndex = (prev.currentSongIndex - 1 + prev.playlist.length) % prev.playlist.length;
+      return { ...prev, currentSongIndex: prevIndex, isPlaying: true };
+    });
+  };
+
+  const handleLoopClick = () => {
+    setMusicState(prev => {
+      if (prev.loopMode === "none") return { ...prev, loopMode: "list" };
+      if (prev.loopMode === "list") return { ...prev, loopMode: "single" };
+      return { ...prev, loopMode: "none" };
+    });
   };
 
   const currentSong = musicState.playlist[musicState.currentSongIndex];
@@ -273,35 +290,61 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
 
                 {/* Controls */}
                 <div className="space-y-6">
-                  <div className="flex items-center justify-center gap-8">
+                  <div className="flex items-center justify-center gap-6">
                     <button
                       onClick={handleLoopClick}
-                      onDoubleClick={handleLoopDoubleClick}
-                      className={`p-4 rounded-2xl transition-all ${
+                      className={`p-3 rounded-xl transition-all relative group ${
                         musicState.loopMode !== "none" 
                           ? "bg-pink-100 text-pink-500 dark:bg-pink-900/40" 
                           : "bg-gray-50 text-gray-300 dark:bg-gray-800"
                       }`}
                     >
-                      <Repeat className={`w-6 h-6 ${musicState.loopMode === "single" ? "scale-110" : ""}`} />
+                      <Repeat className={`w-5 h-5 ${musicState.loopMode === "single" ? "scale-110" : ""}`} />
+                      {musicState.loopMode === "single" && (
+                        <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-[8px] w-3 h-3 rounded-full flex items-center justify-center">1</span>
+                      )}
+                      <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                        {musicState.loopMode === "none" ? "Không lặp" : musicState.loopMode === "list" ? "Lặp danh sách" : "Lặp 1 bài"}
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={playPrev}
+                      className="p-3 bg-pink-50 hover:bg-pink-100 text-pink-400 rounded-xl transition-all active:scale-90 dark:bg-gray-800"
+                    >
+                      <SkipBack className="w-5 h-5" />
                     </button>
 
                     <button
                       onClick={togglePlay}
-                      className="w-20 h-20 bg-pink-300 hover:bg-pink-400 text-white rounded-[2rem] flex items-center justify-center shadow-lg shadow-pink-200 dark:shadow-none hover:scale-105 active:scale-95 transition-all group"
+                      className="w-16 h-16 bg-pink-300 hover:bg-pink-400 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-pink-200 dark:shadow-none hover:scale-105 active:scale-95 transition-all"
                     >
-                      <CatPawIcon className={`w-12 h-12 transition-transform ${musicState.isPlaying ? "scale-90" : "scale-110"}`} />
+                      {musicState.isPlaying ? (
+                        <Pause className="w-8 h-8 fill-current" />
+                      ) : (
+                        <Play className="w-8 h-8 fill-current ml-1" />
+                      )}
+                    </button>
+
+                    <button
+                      onClick={playNext}
+                      className="p-3 bg-pink-50 hover:bg-pink-100 text-pink-400 rounded-xl transition-all active:scale-90 dark:bg-gray-800"
+                    >
+                      <SkipForward className="w-5 h-5" />
                     </button>
 
                     <button
                       onClick={() => setMusicState(prev => ({ ...prev, isShuffle: !prev.isShuffle }))}
-                      className={`p-4 rounded-2xl transition-all ${
+                      className={`p-3 rounded-xl transition-all relative group ${
                         musicState.isShuffle
                           ? "bg-pink-100 text-pink-500 dark:bg-pink-900/40" 
                           : "bg-gray-50 text-gray-300 dark:bg-gray-800"
                       }`}
                     >
-                      <Shuffle className="w-6 h-6" />
+                      <Shuffle className="w-5 h-5" />
+                      <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                        Phát ngẫu nhiên: {musicState.isShuffle ? "Bật" : "Tắt"}
+                      </div>
                     </button>
                   </div>
 
