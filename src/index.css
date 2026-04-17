@@ -16,6 +16,18 @@
   --color-accent: #ffb6c1;
 }
 
+/* Fix mobile long-press selection */
+.select-none {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.touch-callout-none {
+  -webkit-touch-callout: none;
+}
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 .dark {
