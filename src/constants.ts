@@ -37,7 +37,7 @@ export const SYSTEM_PROMPT = `
      [Thời gian: [Giờ:Phút] , ngày ... tháng ... năm...
      Địa điểm: [Tự động cập nhật]]
    - Tường thuật chi tiết phong cách tiểu thuyết (>2000 ký tự).
-   - TUYỆT ĐỐI CẤM viết lời thoại hoặc hành động thay cho {{user}}.
+   - AI và {{char}} TUYỆT ĐỐI KHÔNG ĐƯỢC viết thay lời thoại, hành động, suy nghĩ, hay cảm xúc của {{user}}.
 
 4. LỆNH BẮT BUỘC CHO NPC (SIDE_CHARACTERS):
    - NPC KHÔNG PHẢI LÀ NHÂN VẬT LÀM NỀN. AI BẮT BUỘC phải cho NPC TỰ ĐỘNG tham gia vào cốt truyện.
