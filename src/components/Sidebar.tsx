@@ -70,6 +70,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [editEventValue, setEditEventValue] = React.useState("");
   const [isAddingSnapshot, setIsAddingSnapshot] = React.useState(false);
   const [snapshotName, setSnapshotName] = React.useState("");
+  const [sessionToDeleteId, setSessionToDeleteId] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     if (!isChatActive && activeTab === "notebook") {
@@ -178,21 +179,53 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           onClose();
                         }}
                       >
-                        <div className="pr-8">
+                        <div className="pr-12">
                           <p className="font-bold text-[var(--color-text-primary)] truncate">{session.name}</p>
-                          <p className="text-xs text-[var(--color-text-secondary)] mt-1">
-                            {new Date(session.lastUpdate).toLocaleString("vi-VN")}
-                          </p>
+                          <div className="flex flex-col gap-0.5 mt-1">
+                            <p className="text-[10px] text-[var(--color-text-secondary)]">
+                              {new Date(session.lastUpdate).toLocaleString("vi-VN")}
+                            </p>
+                            <p className="text-[10px] text-[#ff99cc] font-medium">
+                              {session.messages.length} lượt chat
+                            </p>
+                          </div>
                         </div>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDeleteSession(session.id);
-                          }}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 p-2 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                          {sessionToDeleteId === session.id ? (
+                            <div className="flex items-center gap-1 bg-[var(--color-bg-primary)] p-1 rounded-lg border border-red-200 shadow-sm animate-in fade-in zoom-in duration-200">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onDeleteSession(session.id);
+                                  setSessionToDeleteId(null);
+                                }}
+                                className="text-[10px] bg-red-500 text-white px-2 py-1 rounded-md font-bold hover:bg-red-600 transition-colors"
+                              >
+                                Xóa
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSessionToDeleteId(null);
+                                }}
+                                className="text-[10px] bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-300 px-2 py-1 rounded-md font-bold"
+                              >
+                                Hủy
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSessionToDeleteId(session.id);
+                              }}
+                              className="p-2 text-gray-400 hover:text-red-500 transition-all opacity-100 sm:opacity-40 group-hover:opacity-100"
+                              title="Xóa lịch sử"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
